@@ -1,0 +1,6 @@
+[submodule "backend"]
+	path = backend
+	url = https://github.com/zmykedev/cmpc-backend
+[submodule "cmcp-front-repo"]
+	path = cmcp-front-repo
+	url = https://github.com/zmykedev/cmpc-front
