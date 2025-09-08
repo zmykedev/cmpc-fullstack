@@ -27,7 +27,7 @@ services:
   # Backend API (NestJS)
   backend:
     build:
-      context: ./cmpc-backend-clean
+      context: ./backend
       dockerfile: Dockerfile
     container_name: cmpc-backend
     restart: unless-stopped
@@ -52,8 +52,6 @@ services:
         condition: service_healthy
     networks:
       - cmpc-network
-    volumes:
-      - ./cmpc-backend/google-strategy-new.json:/app/google-strategy-new.json:ro
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/v1/books', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
       interval: 30s
@@ -65,7 +63,7 @@ services:
   # Frontend (React/Vite + Nginx)
   frontend:
     build:
-      context: ./cmcp-front
+      context: ./cmcp-front-repo
       dockerfile: Dockerfile
     container_name: cmpc-frontend
     restart: unless-stopped
