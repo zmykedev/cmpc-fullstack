@@ -1,0 +1,99 @@
+services:
+  # PostgreSQL Database
+  database:
+  
+    image: postgres:15-alpine
+    container_name: cmpc-database
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: railway
+      DATABASE_PORT: 47889
+      POSTGRES_HOST: mainline.proxy.rlwy.net
+      POSTGRES_USER: postgres 
+      POSTGRES_PASSWORD: PWTbDezzmQjcznrWDtadaoDAANGTowxM 
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - cmpc-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d railway"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (NestJS)
+  backend:
+    build:
+      context: ./cmpc-backend-clean
+      dockerfile: Dockerfile
+    container_name: cmpc-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_HOST: mainline.proxy.rlwy.net
+      DATABASE_PORT: 47889
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: PWTbDezzmQjcznrWDtadaoDAANGTowxM
+      DATABASE_NAME: railway
+      JWT_SECRET: 3f8d7b2e-1a4c-4b6d-9f12-8c5e7a0b2c1d
+      JWT_REFRESH_SECRET: 8f2d7b1e-2a5c-4b8d-9f15-8c2e7a0b2c4d
+      ACCESS_TOKEN_EXPIRATION: 1h
+      REFRESH_TOKEN_EXPIRATION: 7d
+      CORS: true
+      IMGBB_API_KEY: 886b5fb17d7788b18f9f47e60dad5aae
+    ports:
+      - "3000:3000"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - cmpc-network
+    volumes:
+      - ./cmpc-backend/google-strategy-new.json:/app/google-strategy-new.json:ro
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/v1/books', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+   
+
+  # Frontend (React/Vite + Nginx)
+  frontend:
+    build:
+      context: ./cmcp-front
+      dockerfile: Dockerfile
+    container_name: cmpc-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - cmpc-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+ 
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  cmpc-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
