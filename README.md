@@ -17,6 +17,18 @@
 
 **CMPC-Libros** es un sistema empresarial completo para la gestión de inventario de libros, desarrollado con tecnologías modernas y arquitectura escalable. El sistema incluye una aplicación web responsiva, una API REST robusta, sistema de auditoría completo y documentación exhaustiva.
 
+### 🚀 **Instalación Rápida con Docker**
+
+```bash
+git clone <repository-url> && cd CMPC-Libros
+docker-compose up -d
+# ¡Listo! Aplicación disponible en http://localhost
+```
+
+**Todo incluido:** Base de datos PostgreSQL, Backend NestJS, Frontend React, configuración automática, y documentación en http://localhost:3000/docs
+
+> 📦 **¿Nuevo en Docker?** No te preocupes, las instrucciones incluyen comandos detallados, solución de problemas comunes, y verificación paso a paso.
+
 ## ✨ Características Principales
 
 ### 🖥️ **Frontend (React SPA)**
@@ -139,20 +151,58 @@ graph TB
 
 ## 🚀 Inicio Rápido
 
-### **Prerrequisitos**
+> 🎯 **Recomendación**: Usa Docker Compose para la instalación más rápida y sin complicaciones
+
+### **🐳 Opción 1: Docker Compose (Recomendado) - Listo en 3 minutos** ⭐
+
+**Prerrequisitos:**
+- Docker Engine 20.10+
+- Docker Compose 2.0+
+
+```bash
+# 1. Clonar y acceder al directorio
+git clone <repository-url>
+cd CMPC-Libros
+
+# 2. [OPCIONAL] Configurar variables de entorno personalizadas
+# Si quieres usar tus propias credenciales de BD, JWT secrets, etc.
+cp env.production.template .env
+# Editar .env con tus valores personalizados
+
+# 3. Levantar toda la aplicación con un comando
+docker-compose up -d
+
+# 4. Esperar a que todos los servicios estén listos (1-2 minutos)
+# Verificar estado de servicios
+docker-compose ps
+
+# 5. ¡Listo! Acceder a la aplicación
+```
+
+**⚠️ Nota importante**: El archivo `docker-compose.yml` incluye valores por defecto que funcionan inmediatamente. Solo necesitas crear un archivo `.env` si quieres personalizar la configuración (como usar tu propia base de datos externa, cambiar JWT secrets, etc.).
+
+**URLs de acceso:**
+- **🖥️ Aplicación Web**: http://localhost (puerto 80)
+- **⚙️ Backend API**: http://localhost:3000
+- **📖 Documentación API**: http://localhost:3000/docs
+- **🗄️ Base de datos**: PostgreSQL en puerto 5432
+
+### **💻 Opción 2: Instalación Manual (Desarrollo)**
+
+**Prerrequisitos:**
 - **Node.js** >= 18.0.0
 - **PostgreSQL** >= 13.0
 - **npm** o **pnpm**
 
-### **1. Clonar el Repositorio**
+#### **2.1. Clonar el Repositorio**
 ```bash
 git clone <repository-url>
 cd CMPC-Libros
 ```
 
-### **2. Configurar Backend**
+#### **2.2. Configurar Backend**
 ```bash
-cd cmpc-back
+cd cmpc-backend-clean
 npm install
 cp env.example .env
 # Configurar variables de entorno en .env
@@ -160,19 +210,18 @@ npm run migration:run
 npm run start:dev
 ```
 
-### **3. Configurar Frontend**
+#### **2.3. Configurar Frontend**
 ```bash
 cd cmcp-front
 npm install
-cp .env.example .env.local
-# Configurar variables de entorno en .env.local
+# Configurar variables de entorno si es necesario
 npm run dev
 ```
 
-### **4. Acceder a la Aplicación**
+#### **2.4. Acceder a la Aplicación**
 - **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:3001
-- **Documentación**: http://localhost:3001/docs
+- **Backend API**: http://localhost:3000
+- **Documentación**: http://localhost:3000/docs
 
 ## 📚 Documentación Completa
 
@@ -254,22 +303,126 @@ npm run dev
 # ✅ Frontend disponible en: http://localhost:5173
 ```
 
-##### **🐳 Configuración con Docker**
+##### **🐳 Configuración con Docker Compose (Recomendado)**
+
+**Prerrequisitos:**
+- Docker Engine 20.10+ 
+- Docker Compose 2.0+
+
 ```bash
 # 1. Clonar el repositorio
 git clone <repository-url>
-cd cmpc-libros
+cd CMPC-Libros
 
-# 2. Construir y ejecutar con Docker Compose
+# 2. Configurar variables de entorno (opcional - valores por defecto incluidos)
+cp env.production.template .env
+
+# 3. Construir y ejecutar todos los servicios
 docker-compose up -d
 
-# 3. Verificar servicios
+# 4. Verificar que todos los servicios estén corriendo
 docker-compose ps
 
-# ✅ Frontend: http://localhost:5173
-# ✅ Backend: http://localhost:3000
-# ✅ Database: localhost:5432
+# 5. Ver logs en tiempo real (opcional)
+docker-compose logs -f
+
+# ✅ Aplicación completa disponible:
+# Frontend: http://localhost (puerto 80)
+# Backend API: http://localhost:3000
+# Documentación API: http://localhost:3000/docs
+# Base de datos: PostgreSQL en puerto 5432
 ```
+
+**Comandos útiles de Docker Compose:**
+```bash
+# Parar todos los servicios
+docker-compose down
+
+# Reconstruir servicios después de cambios en código
+docker-compose up -d --build
+
+# Ver logs de un servicio específico
+docker-compose logs -f backend
+docker-compose logs -f frontend
+docker-compose logs -f database
+
+# Ejecutar comandos dentro de un contenedor
+docker-compose exec backend npm run migration:run
+docker-compose exec database psql -U postgres -d railway
+
+# Limpiar volúmenes (¡CUIDADO: elimina datos de BD!)
+docker-compose down -v
+
+# Monitorear recursos
+docker-compose top
+```
+
+**Arquitectura de contenedores:**
+- **frontend**: Nginx sirviendo React SPA (puerto 80)
+- **backend**: NestJS API (puerto 3000)  
+- **database**: PostgreSQL 15 (puerto 5432)
+- **Redes**: Todos los servicios en red privada `cmpc-network`
+- **Volúmenes**: Persistencia de datos PostgreSQL
+- **Health checks**: Verificación automática de estado de servicios
+
+### **🔧 Variables de Entorno Personalizables**
+
+Si quieres personalizar la configuración, crea un archivo `.env` en la raíz del proyecto:
+
+```bash
+# Copiar template y personalizar
+cp env.production.template .env
+```
+
+**Variables principales que puedes personalizar:**
+```env
+# Base de datos (si usas BD externa)
+DATABASE_HOST=tu-host-externo.com
+DATABASE_PORT=5432
+DATABASE_USER=tu-usuario
+DATABASE_PASSWORD=tu-password
+DATABASE_NAME=tu-base-de-datos
+
+# JWT Secrets (recomendado cambiar en producción)
+JWT_SECRET=tu-jwt-secret-super-seguro
+JWT_REFRESH_SECRET=tu-refresh-secret-super-seguro
+
+# Configuración de aplicación
+NODE_ENV=production
+CORS=true
+
+# Frontend (si cambias la URL del backend)
+VITE_API_URL=http://localhost:3000
+```
+
+**⚠️ Importante:** Si no creas un archivo `.env`, se usarán los valores por defecto incluidos en `docker-compose.yml` que funcionan perfectamente para desarrollo y testing local.
+
+### **✅ Verificación de la Instalación**
+
+Después de ejecutar `docker-compose up -d`, verifica que todo funcione correctamente:
+
+```bash
+# 1. Verificar que todos los servicios estén corriendo
+docker-compose ps
+# Deberías ver: database (healthy), backend (healthy), frontend (healthy)
+
+# 2. Verificar logs por si hay errores
+docker-compose logs --tail=20
+
+# 3. Probar endpoints principales
+curl http://localhost:3000/api/v1/books          # Backend API
+curl http://localhost                            # Frontend web
+
+# 4. Acceder a la documentación de la API
+# Abrir en navegador: http://localhost:3000/docs
+```
+
+**Estado esperado:**
+- ✅ Base de datos PostgreSQL corriendo en puerto 5432
+- ✅ Backend NestJS corriendo en puerto 3000
+- ✅ Frontend React servido por Nginx en puerto 80
+- ✅ Health checks pasando para todos los servicios
+- ✅ API accesible en http://localhost:3000/docs
 
 #### **📖 3. Guía de Uso de la Aplicación**
 
@@ -868,13 +1021,129 @@ docker build -t cmpc-frontend .
 docker run -p 5173:5173 cmpc-frontend
 ```
 
-### **Docker Compose**
+### **🐳 Docker Compose (Producción)**
 ```bash
-# Servicios completos
+# Levantar todos los servicios
 docker-compose up -d
 
+# Ver estado de servicios
+docker-compose ps
+
+# Ver logs en tiempo real
+docker-compose logs -f
+
+# Parar servicios
+docker-compose down
+
+# Reconstruir después de cambios
+docker-compose up -d --build
+```
+
+### **🔧 Comandos útiles Docker**
+```bash
 # Solo base de datos
-docker-compose up -d postgres
+docker-compose up -d database
+
+# Ejecutar migraciones
+docker-compose exec backend npm run migration:run
+
+# Acceder a la base de datos
+docker-compose exec database psql -U postgres -d railway
+
+# Monitorear recursos
+docker-compose top
+
+# Limpiar sistema (¡CUIDADO!)
+docker-compose down -v --remove-orphans
+```
+
+## 🔧 Solución de Problemas (Docker)
+
+### **❌ Problemas Comunes**
+
+#### **1. Error: "Port already in use"**
+```bash
+# Ver qué procesos usan los puertos
+sudo lsof -i :80    # Frontend
+sudo lsof -i :3000  # Backend  
+sudo lsof -i :5432  # Database
+
+# Matar proceso específico
+sudo kill -9 <PID>
+
+# O cambiar puertos en docker-compose.yml
+```
+
+#### **2. Error: "Database connection failed"**
+```bash
+# Verificar que la BD esté ejecutándose
+docker-compose ps
+
+# Ver logs de la base de datos
+docker-compose logs database
+
+# Reiniciar solo la base de datos
+docker-compose restart database
+
+# Verificar salud del contenedor
+docker-compose exec database pg_isready -U postgres
+```
+
+#### **3. Error: "Backend health check failed"**
+```bash
+# Ver logs detallados del backend
+docker-compose logs backend
+
+# Verificar variables de entorno
+docker-compose exec backend env | grep DATABASE
+
+# Probar conexión manual
+docker-compose exec backend node -e "console.log('Backend running')"
+
+# Reconstruir solo el backend
+docker-compose up -d --build backend
+```
+
+#### **4. Error: "Frontend not loading"**
+```bash
+# Verificar nginx está corriendo
+docker-compose exec frontend nginx -t
+
+# Ver logs de nginx
+docker-compose logs frontend
+
+# Verificar archivos compilados
+docker-compose exec frontend ls -la /usr/share/nginx/html/
+```
+
+### **🔄 Comandos de Diagnóstico**
+```bash
+# Estado completo del sistema
+docker-compose ps
+docker system df
+docker system prune
+
+# Logs por tiempo
+docker-compose logs --since=10m
+docker-compose logs --tail=50
+
+# Información detallada de contenedores
+docker-compose exec backend cat /proc/version
+docker-compose exec backend df -h
+docker-compose exec backend free -h
+```
+
+### **🚨 Comandos de Emergencia**
+```bash
+# Reinicio completo limpio
+docker-compose down
+docker system prune -f
+docker-compose up -d --build
+
+# Reset completo (¡PIERDE DATOS!)
+docker-compose down -v
+docker system prune -a -f
+docker-compose up -d --build
 ```
 
 ## 🔒 Seguridad
